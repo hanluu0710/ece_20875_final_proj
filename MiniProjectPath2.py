@@ -2,8 +2,10 @@ import pandas
 from sklearn.linear_model import RidgeCV
 from sklearn.model_selection import LeaveOneOut, cross_val_predict
 from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_squared_error
 import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn import linear_model
+from sklearn.metrics import r2_score, mean_squared_error
 
 ''' 
 The following is the starting code for path2 for data reading to make your first step easier.
@@ -38,28 +40,27 @@ def getRelevant():
     print(f"Sensor should not be on {x_labels[scores.index(min(scores))]}")
 
 def weather (dataset_2):
-    dataset_2["Total"]  = pandas.to_numeric(dataset_2["Total"].replace(',','', regex=True))
-    dataset_2["Precipitation"]  = pandas.to_numeric(dataset_2["Precipitation"].replace(',','', regex=True))
-    dataset_2["Low Temp"]  = pandas.to_numeric(dataset_2["Low Temp"].replace(',','', regex=True))
-    dataset_2["High Temp"]  = pandas.to_numeric(dataset_2["High Temp"].replace(',','', regex=True))
-
 
     X = dataset_2[["High Temp", "Low Temp", "Precipitation"]]
     y = dataset_2["Total"]
-
-
-    from sklearn.model_selection import train_test_split
-    from sklearn.linear_model import LinearRegression
-    from sklearn.metrics import r2_score
-
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, shuffle=False
     )
 
-    model = LinearRegression().fit(X_train, y_train)
+    model = linear_model.Ridge()
+    model.fit(X_train, y_train)
     preds = model.predict(X_test)
+    train_preds = model.predict(X_train)
+    print(f"Best alpha: {model.alpha}")
+    r2 = r2_score(y_test, preds)
+    #mse = mean_squared_error(y_test, preds)
+    train_mse = mean_squared_error(y_train, train_preds)
 
-    print("R2:", r2_score(y_test, preds))
+    print("R²:", r2)
+    print("Train MSE:", train_mse)
+    print("Weather data is not predictive because even though R^2 value is larger than 0.5 (0.585>0.5), the model's MSE is 16700664 " \
+    "which is really large even when Ridge is applied.")
+
 
 
 getRelevant()
