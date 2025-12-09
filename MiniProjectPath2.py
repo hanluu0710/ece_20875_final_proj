@@ -1,6 +1,8 @@
 import pandas
-from sklearn.linear_model import Ridge
+from sklearn.linear_model import RidgeCV
+from sklearn.model_selection import LeaveOneOut, cross_val_predict
 from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error
 import numpy as np
 
 ''' 
@@ -13,11 +15,26 @@ dataset_2['Manhattan Bridge']     = pandas.to_numeric(dataset_2['Manhattan Bridg
 dataset_2['Queensboro Bridge']    = pandas.to_numeric(dataset_2['Queensboro Bridge'].replace(',','', regex=True))
 dataset_2['Williamsburg Bridge']  = pandas.to_numeric(dataset_2['Williamsburg Bridge'].replace(',','', regex=True))
 dataset_2['Total']                = pandas.to_numeric(dataset_2['Total'].replace(',','', regex=True))
+dataset_2['High Temp']            = pandas.to_numeric(dataset_2['High Temp'].replace(',','', regex=True))
+dataset_2['Low Temp']             = pandas.to_numeric(dataset_2['Low Temp'].replace(',','', regex=True))
+dataset_2['Precipitation']         = pandas.to_numeric(dataset_2['Precipitation'].replace(',','', regex=True))
+
+x_samples = [dataset_2["Brooklyn Bridge"], dataset_2['Manhattan Bridge'], dataset_2['Queensboro Bridge'], dataset_2['Williamsburg Bridge']]
+x_labels = ["Brooklyn Bridge", 'Manhattan Bridge', 'Queensboro Bridge', 'Williamsburg Bridge']
 
 def getRelevant():
+    global x_samples
+    scores = []
+    
     for i in range(4):
-        x = np.column_stack((dataset_2["Brooklyn Bridge"], dataset_2['Manhattan Bridge'], dataset_2['Queensboro Bridge'], dataset_2['Williamsburg Bridge']))
-        linear_reg = LinearRegression().fit(x, dataset_2["Total"])
-        print(linear_reg.coef_)
+        x = np.column_stack(x_samples[1:])
+        x_samples = x_samples[1:] + x_samples[:1]
+        linear_model = LinearRegression().fit(x, dataset_2['Total'])
+        scores.append(linear_model.score(x, dataset_2['Total']))
+
+    print(scores)
+    print(f"Sensor should not be on {x_labels[scores.index(min(scores))]}")
+
+
 
 getRelevant()
