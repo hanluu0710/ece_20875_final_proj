@@ -5,7 +5,11 @@ from sklearn.linear_model import LinearRegression
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn import linear_model
-from sklearn.metrics import r2_score, mean_squared_error
+from sklearn.metrics import r2_score, mean_squared_error, accuracy_score, roc_auc_score
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
+from sklearn.neural_network import MLPClassifier
+
 
 ''' 
 The following is the starting code for path2 for data reading to make your first step easier.
@@ -60,22 +64,6 @@ def weather (dataset_2):
     print("Train MSE:", train_mse)
     print("Weather data is not predictive because even though R^2 value is larger than 0.5 (0.585>0.5), the model's MSE is 16700664 " \
     "which is really large even when Ridge is applied.")
-
-
-
-getRelevant()
-weather(dataset_2)
-
-
-######################################
-import numpy as np
-
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.svm import SVC
-from sklearn.neural_network import MLPClassifier
-
-# Import scikit-learn metrics module for accuracy and AUROC calculation
-from sklearn import metrics
 
 def conf_matrix(y_pred, y_true, num_class):
     """
@@ -157,42 +145,65 @@ def get_model_results(model_name, params, train_data, train_labels, test_data, t
     # 3. Predict the response for test dataset
     predict = model.predict(test_data)
     # 4. Model Accuracy, how often is the classifier correct? You may use metrics.accuracy_score(...)
-    acc = metrics.accuracy_score(y_true=test_labels,y_pred=predict)
+    acc = accuracy_score(y_true=test_labels,y_pred=predict)
     # 5. Calculate the confusion matrix by using the completed the function above 
     conf_mat = conf_matrix(predict,test_labels,num_class)
     # 6. Compute the AUROC score. You may use metrics.roc_auc_score(...)
-    auc_scor = metrics.roc_auc_score(y_true=test_labels,y_score=model.predict_proba(test_data),multi_class='ovr')
+    auc_scor = roc_auc_score(y_true=test_labels,y_score=model.predict_proba(test_data),multi_class='ovr')
     #acc, conf_mat, auc_scor = None, None, None # DELETE THIS LINE ONCE YOU HAVE CODED YOUR RESULTS 
     return acc, conf_mat, auc_scor
 
+def getMatrixSum(matrix):
+    sum = 0
+    for i in matrix:
+        for y in i:
+            sum += y
+    return sum
 
-# if __name__ == "__main__":
-#     train_data, train_labels, test_data, test_labels = load_Dataset()
-#     num_class = 10
+def trainDay():
+    X = np.column_stack(x_samples)
+    Y_label = pandas.Series(dataset_2['Day']).astype("category")
+    Y_string_label = Y_label.cat.categories
+    Y_int_label = Y_label.cat.codes
+    print(f"Size of Label = {len(Y_int_label)}")
+
+    num_class = 7 #Corresponding to number of days
+
+    train_data, test_data, train_labels, test_labels = train_test_split(
+        X, Y_int_label, test_size=0.2, shuffle=False
+    )
+
+    model_name = "KNN"
+    for k in range(1,6):
+        print(str(k)+"-neighbors result:")
+        params = k
+        accuracy, confusion_matrix, auc_score = get_model_results(model_name, params, train_data, train_labels, test_data, test_labels, num_class)
+        print("Accuracy:", accuracy)
+        print("AUROC Score:", auc_score)
+        print(confusion_matrix)
+        print(f"Matrix sum = {getMatrixSum(confusion_matrix)}")
+        print()
+
+    model_name = "SVM"
+    params = [1, True]
+    accuracy, confusion_matrix, auc_score = get_model_results(model_name, params, train_data, train_labels, test_data, test_labels, num_class)
+    print("SVM Result")
+    print("Accuracy:", accuracy)
+    print("AUROC Score:", auc_score)
+    print(confusion_matrix)
+    print(f"Matrix sum = {getMatrixSum(confusion_matrix)}")
+    print()
     
-#     model_name = "KNN"
-#     for k in range(1,6):
-#         print(str(k)+"-neighbors result:")
-#         params = k
-#         accuracy, confusion_matrix, auc_score = get_model_results(model_name, params, train_data, train_labels, test_data, test_labels, num_class)
-#         print("Accuracy:", accuracy)
-#         print("AUROC Score:", auc_score)
-#         print(confusion_matrix)
-#         print()
-        
-#     model_name = "SVM"
-#     params = [1, True]
-#     accuracy, confusion_matrix, auc_score = get_model_results(model_name, params, train_data, train_labels, test_data, test_labels, num_class)
-#     print("SVM Result")
-#     print("Accuracy:", accuracy)
-#     print("AUROC Score:", auc_score)
-#     print(confusion_matrix)
-#     print()
-    
-#     model_name = "MLP"
-#     params = [(15,10), 1, "relu"]
-#     accuracy, confusion_matrix, auc_score = get_model_results(model_name, params, train_data, train_labels, test_data, test_labels, num_class)
-#     print("MLP Result")
-#     print("Accuracy:", accuracy)
-#     print("AUROC Score:", auc_score)
-#     print(confusion_matrix)
+    model_name = "MLP"
+    params = [(15,10), 1, "relu"]
+    accuracy, confusion_matrix, auc_score = get_model_results(model_name, params, train_data, train_labels, test_data, test_labels, num_class)
+    print("MLP Result")
+    print("Accuracy:", accuracy)
+    print("AUROC Score:", auc_score)
+    print(confusion_matrix)
+    print(f"Matrix sum = {getMatrixSum(confusion_matrix)}")
+
+
+getRelevant()
+weather(dataset_2)
+trainDay()
