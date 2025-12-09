@@ -1,15 +1,13 @@
 import pandas
-from sklearn.linear_model import RidgeCV
-from sklearn.model_selection import LeaveOneOut, cross_val_predict
-from sklearn.linear_model import LinearRegression
 import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 from sklearn import linear_model
 from sklearn.metrics import r2_score, mean_squared_error, accuracy_score, roc_auc_score
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from sklearn.neural_network import MLPClassifier
-
 
 ''' 
 The following is the starting code for path2 for data reading to make your first step easier.
@@ -162,10 +160,11 @@ def getMatrixSum(matrix):
 
 def trainDay():
     X = np.column_stack(x_samples)
-    Y_label = pandas.Series(dataset_2['Day']).astype("category")
-    Y_string_label = Y_label.cat.categories
-    Y_int_label = Y_label.cat.codes
-    print(f"Size of Label = {len(Y_int_label)}")
+    # Y_string_label = Y_label.cat.categories
+    # Y_int_label = Y_label.cat.codes
+    
+    Y_label = {"Monday":0, "Tuesday":1, "Wednesday":2, "Thursday":3, "Friday":4, "Saturday":5, "Sunday":6}
+    Y_int_label = [Y_label[i] for i in dataset_2["Day"]]
 
     num_class = 7 #Corresponding to number of days
 
@@ -184,6 +183,22 @@ def trainDay():
         print(f"Matrix sum = {getMatrixSum(confusion_matrix)}")
         print()
 
+        rows, cols = confusion_matrix.shape
+        for r in range(rows):
+            for c in range(cols):
+                # ax.text() places text at a specific coordinate (x, y)
+                # x is the column index (c), y is the row index (r)
+                # ha='center' (horizontal alignment) and va='center' (vertical alignment) center the text within the cell
+                # color='black' ensures visibility against lighter colors
+                plt.text(c, r, confusion_matrix[r, c], ha='center', va='center', color='black', fontsize=12)
+        
+        plt.imshow(confusion_matrix, cmap='GnBu', origin='lower')
+        plt.colorbar(label='Value')
+        plt.xlabel("Predicted")
+        plt.ylabel("Actual")
+        plt.title(f"KNN with {k} neighbors")
+        plt.show()
+
     model_name = "SVM"
     params = [1, True]
     accuracy, confusion_matrix, auc_score = get_model_results(model_name, params, train_data, train_labels, test_data, test_labels, num_class)
@@ -193,7 +208,23 @@ def trainDay():
     print(confusion_matrix)
     print(f"Matrix sum = {getMatrixSum(confusion_matrix)}")
     print()
+    rows, cols = confusion_matrix.shape
+    for r in range(rows):
+        for c in range(cols):
+            # ax.text() places text at a specific coordinate (x, y)
+            # x is the column index (c), y is the row index (r)
+            # ha='center' (horizontal alignment) and va='center' (vertical alignment) center the text within the cell
+            # color='black' ensures visibility against lighter colors
+            plt.text(c, r, confusion_matrix[r, c], ha='center', va='center', color='black', fontsize=12)
     
+    plt.imshow(confusion_matrix, cmap='GnBu', origin='lower')
+    plt.colorbar(label='Value')
+    plt.xlabel("Predicted")
+    plt.ylabel("Actual")
+    plt.title(f"SVM Classification")
+    plt.show()    
+
+
     model_name = "MLP"
     params = [(15,10), 1, "relu"]
     accuracy, confusion_matrix, auc_score = get_model_results(model_name, params, train_data, train_labels, test_data, test_labels, num_class)
@@ -202,7 +233,20 @@ def trainDay():
     print("AUROC Score:", auc_score)
     print(confusion_matrix)
     print(f"Matrix sum = {getMatrixSum(confusion_matrix)}")
-
+    for r in range(rows):
+        for c in range(cols):
+            # ax.text() places text at a specific coordinate (x, y)
+            # x is the column index (c), y is the row index (r)
+            # ha='center' (horizontal alignment) and va='center' (vertical alignment) center the text within the cell
+            # color='black' ensures visibility against lighter colors
+            plt.text(c, r, confusion_matrix[r, c], ha='center', va='center', color='black', fontsize=12)
+    
+    plt.imshow(confusion_matrix, cmap='GnBu', origin='lower')
+    plt.colorbar(label='Value')
+    plt.xlabel("Predicted")
+    plt.ylabel("Actual")
+    plt.title(f"MLP Classification")
+    plt.show()
 
 getRelevant()
 weather(dataset_2)
