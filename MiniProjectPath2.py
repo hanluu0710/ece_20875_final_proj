@@ -39,7 +39,12 @@ def getRelevant():
         scores.append(linear_model.score(x, dataset_2['Total']))
 
     print(scores)
-    print(f"Sensor should not be on {x_labels[scores.index(min(scores))]}")
+    print(f"Sensor should not be on {x_labels[scores.index(max(scores))]}")
+    all_cols = np.column_stack(x_samples[0:])
+    linear_model = LinearRegression().fit(all_cols, dataset_2['Total'])
+    all_score = linear_model.score(all_cols, dataset_2['Total'])
+    print("All score", all_score)
+
 
 def weather (dataset_2):
 
@@ -57,10 +62,11 @@ def weather (dataset_2):
     r2 = r2_score(y_test, preds)
     #mse = mean_squared_error(y_test, preds)
     train_mse = mean_squared_error(y_train, train_preds)
-
+    test_mse = mean_squared_error(y_test, preds)
     print("R²:", r2)
     print("Train MSE:", train_mse)
-    print("Weather data is not predictive because even though R^2 value is larger than 0.5 (0.585>0.5), the model's MSE is 16700664 " \
+    print("Test MSE:", test_mse)
+    print(f"Weather data is not predictive because even though R^2 value is larger than 0.5 ({r2:.3f}>0.5), the model's test MSE is {test_mse:.3f} " \
     "which is really large even when Ridge is applied.")
 
 def conf_matrix(y_pred, y_true, num_class):
@@ -248,6 +254,42 @@ def trainDay():
     plt.title(f"MLP Classification")
     plt.show()
 
+def numberofcyclistPerDay():
+    cyclist = x_labels+["Total"]
+    weekday_avg = dataset_2.groupby("Day")[cyclist].mean()
+    weekday_avg[cyclist].plot(kind="bar", figsize=(12, 6))
+    plt.xlabel("Day of the Week")
+    plt.ylabel("Average Number of Cyclists")
+    plt.title("Average Number of Cyclists by Day and Bridge")
+    plt.legend()
+    plt.show()
+
+def weatherofday():
+    weather = ["High Temp", "Low Temp"]
+    weekday_avg = dataset_2.groupby("Day")[weather].mean()
+    weekday_avg[weather].plot(kind="bar", figsize=(12, 6))
+    plt.xlabel("Day of the Week")
+    plt.ylabel("Average Temperature (degrees F)")
+    plt.title("Average Weather by Day")
+    plt.legend()
+    plt.show()
+
+def precipitation():
+    precipitation = ["Precipitation"]
+    weekday_avg = dataset_2.groupby("Day")[precipitation].mean()
+    weekday_avg[precipitation].plot(kind="bar", figsize=(12, 6))
+    plt.xlabel("Day of the Week")
+    plt.ylabel("Average Precipitation")
+    plt.title("Average Precipitation by Day")
+    plt.legend()
+    plt.show()
+
+print("Q1")
 getRelevant()
+print("\nQ2")
 weather(dataset_2)
+print("\nQ3")
+numberofcyclistPerDay()
+weatherofday()
+precipitation()
 trainDay()
