@@ -179,7 +179,7 @@ def trainDay():
     )
 
     model_name = "KNN"
-    for k in range(1,6):
+    for k in range(1,21):
         print(str(k)+"-neighbors result:")
         params = k
         accuracy, confusion_matrix, auc_score = get_model_results(model_name, params, train_data, train_labels, test_data, test_labels, num_class)
